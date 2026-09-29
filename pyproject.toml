@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "basalcelldemo"
+name = "onlypoetry"
 version = "0.0.1"
 description = "A demonstration of the BasalCell ecosystem through a simple scRNA-seq data analysis."
 authors = ["Yuji Okano <yujiokano@keio.jp>"]
