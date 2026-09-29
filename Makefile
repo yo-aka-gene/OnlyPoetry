@@ -11,6 +11,8 @@ sync-spec:
 	sed -i '0,/^name = "basalcelldemo"$$/s//name = "onlypoetry"/' pyproject.toml
 
 init: sync-spec
+	poetry config virtualenvs.create true --local
+	poetry config virtualenvs.in-project true --local
 	poetry install
 	poetry run python -m ipykernel install --user --name $(KERNEL_NAME) --display-name "OnlyPoetry (Python)"
 
