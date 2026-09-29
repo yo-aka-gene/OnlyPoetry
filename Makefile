@@ -1,0 +1,20 @@
+BASALCELL_DEMO_REF ?= main
+RAW_BASE := https://raw.githubusercontent.com/yo-aka-gene/BasalCellDemo/$(BASALCELL_DEMO_REF)
+
+.PHONY: init sync-spec
+
+sync-spec:
+	curl -fsSL $(RAW_BASE)/pyproject.toml -o pyproject.toml
+	curl -fsSL $(RAW_BASE)/poetry.lock -o poetry.lock
+
+init: sync-spec
+	poetry install
+
+docs:
+	@echo "Building Sphinx HTML documentation..."
+	@poetry export --with dev --without-hashes --format=requirements.txt > docs/requirements.txt
+	@poetry run sphinx-apidoc -f -o docs/auxiliary_api basalcelldemo_tools/
+	@poetry run sphinx-build -a -E -b html docs docs/_build/html
+	@echo "Opening documentation in browser..."
+	@poetry run python -c \
+		"import webbrowser, os; webbrowser.open('file://' + os.path.realpath('docs/_build/html/index.html'))"
