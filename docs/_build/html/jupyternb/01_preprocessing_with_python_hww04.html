@@ -1,0 +1,1401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01: Preprocessing the PBMC 3k dataset with Python &mdash; OnlyPoetry 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="03: Python-based Preprocessing Routine Reproducibility" href="03_gse223065_acrest-gpu1.html" />
+    <link rel="prev" title="01: Preprocessing the PBMC 3k dataset with Python" href="01_preprocessing_with_python_acrest-gpu1.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/default_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Analysis Code Gallery</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Poetry-only Cross-environment Execution</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../notebooks.html#pbmc3k-workflow">PBMC3k Workflow</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../notebooks.html#acrest-gpu1">acrest-gpu1</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../notebooks.html#shirokane-hww04">SHIROKANE (hww04)</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">01: Preprocessing the PBMC 3k dataset with Python</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#Reference">Reference</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#0.-Execution-Environment-Summary">0. Execution Environment Summary</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#1.-Data-Download">1. Data Download</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#2.-QC">2. QC</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#3.-Normalization">3. Normalization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#4.-Dimensionality-Reduction-and-Manifold-Embedding">4. Dimensionality Reduction and Manifold Embedding</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#5.-Clustering">5. Clustering</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#6.-DEA-and-Annotation">6. DEA and Annotation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#7.-Execution-Environment-Details">7. Execution Environment Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks.html#gse223065-gbm-workflow">GSE223065 GBM Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Auxiliary Python Scripts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../auxiliary_api/modules.html">basalcelldemo_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OnlyPoetry</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../notebooks.html">Poetry-only Cross-environment Execution</a></li>
+      <li class="breadcrumb-item active">01: Preprocessing the PBMC 3k dataset with Python</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/jupyternb/01_preprocessing_with_python_hww04.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="01:-Preprocessing-the-PBMC-3k-dataset-with-Python">
+<h1>01: Preprocessing the PBMC 3k dataset with Python<a class="headerlink" href="#01:-Preprocessing-the-PBMC-3k-dataset-with-Python" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p>Data Download</p></li>
+<li><p>QC</p></li>
+<li><p>Normalization</p></li>
+<li><p>Dimensionality Reduction and Manifold Embedding</p></li>
+<li><p>Clustering</p></li>
+<li><p>DEA and Annotation</p></li>
+</ol>
+<section id="Reference">
+<h2>Reference<a class="headerlink" href="#Reference" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://scanpy.readthedocs.io/en/stable/tutorials/basics/clustering.html">Scanpy’s tutorial</a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="0.-Execution-Environment-Summary">
+<h2>0. Execution Environment Summary<a class="headerlink" href="#0.-Execution-Environment-Summary" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-bash notranslate"><div class="highlight"><pre><span></span>%%bash
+bash<span class="w"> </span>.rep_exe_env_short.sh
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+=== Execution Start ===
+Timestamp (UTC): 2026-09-29T21:33:07Z
+Hostname:        hww04
+OS:              Red Hat Enterprise Linux 8.8 (Ootpa)
+=======================
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="1.-Data-Download">
+<h2>1. Data Download<a class="headerlink" href="#1.-Data-Download" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Downloading the PBMC3k dataset from <a class="reference external" href="https://www.10xgenomics.com/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0">10x Genomics</a>’s source</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-bash notranslate"><div class="highlight"><pre><span></span>%%bash
+
+<span class="nv">DATA_DIR</span><span class="o">=</span><span class="s2">"./data"</span>
+<span class="nv">FILE_NAME</span><span class="o">=</span><span class="s2">"pbmc3k"</span>
+<span class="nv">SRC</span><span class="o">=</span><span class="s2">"http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">"</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">/matrix.mtx"</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$FILE_NAME</span><span class="s2"> data already exists. Skipping download"</span>
+<span class="k">else</span>
+<span class="w">    </span>wget<span class="w"> </span>-q<span class="w"> </span><span class="nv">$SRC</span><span class="w"> </span>-O<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">.tar.gz"</span>
+<span class="w">    </span>tar<span class="w"> </span>-xzf<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">.tar.gz"</span><span class="w"> </span>-C<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">"</span>
+<span class="w">    </span>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">"</span>
+<span class="w">    </span>mv<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/filtered_gene_bc_matrices/hg19/"</span>*<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">"</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/filtered_gene_bc_matrices"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$DATA_DIR</span><span class="s2">/</span><span class="nv">$FILE_NAME</span><span class="s2">.tar.gz"</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Download and extraction completed!"</span>
+<span class="k">fi</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+pbmc3k data already exists. Skipping download
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="2.-QC">
+<h2>2. QC<a class="headerlink" href="#2.-QC" title="Link to this heading"></a></h2>
+<section id="2-1.-Thresholding-QC-metrics">
+<h3>2-1. Thresholding QC metrics<a class="headerlink" href="#2-1.-Thresholding-QC-metrics" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">celltypist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mcolors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polars</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scanpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">basalcelldemo_tools.anndata</span><span class="w"> </span><span class="kn">import</span> <span class="n">transfer_embedding_info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">basalcelldemo_tools.preferences</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DATA_DIR</span><span class="p">,</span>
+    <span class="n">OUTPUT_DIR</span><span class="p">,</span>
+    <span class="n">CellTypist_Models</span><span class="p">,</span>
+    <span class="n">kwarg_savefig</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ENV_SUFFIX</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"ENV_SUFFIX"</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/hshare1/ZETTAI_path_WA_slash_home_KARA/home/yokano/OnlyPoetry/.venv/lib/python3.14/site-packages/celltypist/classifier.py:11: FutureWarning: `__version__` is deprecated, use `importlib.metadata.version(&#39;scanpy&#39;)` instead
+  from scanpy import __version__ as scv
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_10x_mtx</span><span class="p">(</span><span class="s2">"./data/pbmc3k"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">"mt"</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"MT-"</span><span class="p">)</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">"ribo"</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"RPS"</span><span class="p">,</span> <span class="s2">"RPL"</span><span class="p">))</span>
+<span class="n">adata</span><span class="o">.</span><span class="n">var</span><span class="p">[</span><span class="s2">"hb"</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">var_names</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">"^HB[^(P)]"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">calculate_qc_metrics</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span> <span class="n">qc_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"mt"</span><span class="p">,</span> <span class="s2">"ribo"</span><span class="p">,</span> <span class="s2">"hb"</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log1p</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">"n_genes_by_counts"</span><span class="p">,</span> <span class="s2">"total_counts"</span><span class="p">],</span>
+    <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">multi_panel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_10_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_10_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">"pct_counts_mt"</span><span class="p">,</span> <span class="s2">"pct_counts_ribo"</span><span class="p">,</span> <span class="s2">"pct_counts_hb"</span><span class="p">],</span>
+    <span class="n">jitter</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">multi_panel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_11_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_11_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filtered_cells</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">reset_index</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">500</span> <span class="o">&lt;=</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"n_genes_by_counts"</span><span class="p">))</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"n_genes_by_counts"</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1500</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"total_counts"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6000</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pct_counts_mt"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="mi">20</span> <span class="o">&lt;</span> <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pct_counts_ribo"</span><span class="p">))</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pct_counts_ribo"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pct_counts_hb"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"index"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"index"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">index</span>
+<span class="p">)</span>
+
+<span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">filtered_cells</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_cells</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_genes</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">min_cells</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="s2">"total_counts"</span><span class="p">,</span> <span class="s2">"n_genes_by_counts"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"pct_counts_mt"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_14_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_14_0.png" />
+</div>
+</div>
+</section>
+<section id="2-2.-Doublet-Detection">
+<h3>2-2. Doublet Detection<a class="headerlink" href="#2-2.-Doublet-Detection" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">scrublet</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">"total_counts"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"n_genes_by_counts"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"predicted_doublet"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_17_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_17_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="o">~</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"predicted_doublet"</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="3.-Normalization">
+<h2>3. Normalization<a class="headerlink" href="#3.-Normalization" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">normalize_total</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">target_sum</span><span class="o">=</span><span class="mf">1e4</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">adata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="4.-Dimensionality-Reduction-and-Manifold-Embedding">
+<h2>4. Dimensionality Reduction and Manifold Embedding<a class="headerlink" href="#4.-Dimensionality-Reduction-and-Manifold-Embedding" title="Link to this heading"></a></h2>
+<section id="4-1.-Feature-Selection">
+<h3>4-1. Feature Selection<a class="headerlink" href="#4-1.-Feature-Selection" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ad_manifold</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">,</span> <span class="n">n_top_genes</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">highly_variable_genes</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_24_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_24_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ad_manifold</span> <span class="o">=</span> <span class="n">ad_manifold</span><span class="p">[:,</span> <span class="n">ad_manifold</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">highly_variable</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="4-2.-Dimensionality-Reduction">
+<h3>4-2. Dimensionality Reduction<a class="headerlink" href="#4-2.-Dimensionality-Reduction" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">pca</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">,</span> <span class="n">svd_solver</span><span class="o">=</span><span class="s2">"arpack"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="4-3.-Manifold-Embedding">
+<h3>4-3. Manifold Embedding<a class="headerlink" href="#4-3.-Manifold-Embedding" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pp</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">,</span> <span class="n">n_pcs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">ad_manifold</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_31_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_31_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transfer_embedding_info</span><span class="p">(</span><span class="n">adata_source</span><span class="o">=</span><span class="n">ad_manifold</span><span class="p">,</span> <span class="n">adata_target</span><span class="o">=</span><span class="n">adata</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">ad_manifold</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="5.-Clustering">
+<h2>5. Clustering<a class="headerlink" href="#5.-Clustering" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"leiden"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"OnlyPoetry (</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"center left"</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Leiden"</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"umap_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pdf"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg_savefig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 27 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92]
+Closed glyph list over &#39;MATH&#39;: 33 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;GSUB&#39;: 33 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;GSUB&#39;: 33 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;glyf&#39;: 33 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;glyf&#39;: 33 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;L&#39;, &#39;O&#39;, &#39;P&#39;, &#39;d&#39;, &#39;e&#39;, &#39;five&#39;, &#39;four&#39;, &#39;h&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;r&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 19, 20, 21, 22, 23, 24, 25, 47, 50, 51, 71, 72, 75, 76, 79, 81, 82, 85, 87, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Retaining 33 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_35_1.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_35_1.png" />
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="6.-DEA-and-Annotation">
+<h2>6. DEA and Annotation<a class="headerlink" href="#6.-DEA-and-Annotation" title="Link to this heading"></a></h2>
+<section id="6-1.-DEA">
+<h3>6-1. DEA<a class="headerlink" href="#6-1.-DEA" title="Link to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">rank_genes_groups</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="s2">"leiden"</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"wilcoxon"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">degs</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">rank_genes_groups_df</span><span class="p">(</span><span class="n">adata</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">((</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pvals_adj"</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"logfoldchanges"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"group"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span> <span class="s2">"names"</span><span class="p">,</span> <span class="s2">"logfoldchanges"</span><span class="p">,</span> <span class="s2">"pvals_adj"</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">degs</span><span class="o">.</span><span class="n">write_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"degs_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pq"</span><span class="p">)</span>
+<span class="n">degs</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_312, 4)</small><table border="1" class="dataframe"><thead><tr><th>group</th><th>names</th><th>logfoldchanges</th><th>pvals_adj</th></tr><tr><td>str</td><td>str</td><td>f32</td><td>f64</td></tr></thead><tbody><tr><td>&quot;0&quot;</td><td>&quot;LTB&quot;</td><td>2.272123</td><td>3.8567e-85</td></tr><tr><td>&quot;0&quot;</td><td>&quot;IL32&quot;</td><td>2.375396</td><td>1.3022e-73</td></tr><tr><td>&quot;0&quot;</td><td>&quot;LDHB&quot;</td><td>1.738719</td><td>2.0992e-65</td></tr><tr><td>&quot;0&quot;</td><td>&quot;IL7R&quot;</td><td>2.303934</td><td>6.6563e-63</td></tr><tr><td>&quot;0&quot;</td><td>&quot;CD3D&quot;</td><td>1.94753</td><td>3.0324e-49</td></tr><tr><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td></tr><tr><td>&quot;6&quot;</td><td>&quot;PTGDR&quot;</td><td>3.548436</td><td>0.041779</td></tr><tr><td>&quot;6&quot;</td><td>&quot;PLEKHF1&quot;</td><td>3.495875</td><td>0.04282</td></tr><tr><td>&quot;6&quot;</td><td>&quot;MSN&quot;</td><td>1.374327</td><td>0.045105</td></tr><tr><td>&quot;6&quot;</td><td>&quot;JAK1&quot;</td><td>1.744266</td><td>0.047333</td></tr><tr><td>&quot;6&quot;</td><td>&quot;PRDX5&quot;</td><td>1.170669</td><td>0.047923</td></tr></tbody></table></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">n_degs</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">dotplot</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">degs</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="s2">"group"</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"names"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n_degs</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">iter_rows</span><span class="p">()</span>
+    <span class="p">),</span>
+    <span class="s2">"leiden"</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Top </span><span class="si">{</span><span class="n">n_degs</span><span class="si">}</span><span class="s2"> DEGs"</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"top</span><span class="si">{</span><span class="n">n_degs</span><span class="si">}</span><span class="s2">degs_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pdf"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg_savefig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_39_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_39_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 54 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91]
+Closed glyph list over &#39;MATH&#39;: 60 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;GSUB&#39;: 60 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;GSUB&#39;: 65 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;fi&#39;, &#39;five&#39;, &#39;fl&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;uniFB00&#39;, &#39;uniFB03&#39;, &#39;uniFB04&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91, 3506, 3507, 3508, 3509, 3510, 3511, 5038, 5039, 5040, 5041, 5042]
+Closing glyph list over &#39;glyf&#39;: 65 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;fi&#39;, &#39;five&#39;, &#39;fl&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;uniFB00&#39;, &#39;uniFB03&#39;, &#39;uniFB04&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91, 3506, 3507, 3508, 3509, 3510, 3511, 5038, 5039, 5040, 5041, 5042]
+Closed glyph list over &#39;glyf&#39;: 65 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;F&#39;, &#39;G&#39;, &#39;H&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;S&#39;, &#39;T&#39;, &#39;W&#39;, &#39;Y&#39;, &#39;Z&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;f&#39;, &#39;fi&#39;, &#39;five&#39;, &#39;fl&#39;, &#39;four&#39;, &#39;g&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;percent&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;uniFB00&#39;, &#39;uniFB03&#39;, &#39;uniFB04&#39;, &#39;x&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 8, 11, 12, 16, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 53, 54, 55, 58, 60, 61, 68, 70, 72, 73, 74, 76, 79, 81, 82, 83, 85, 86, 87, 88, 91, 3506, 3507, 3508, 3509, 3510, 3511, 5038, 5039, 5040, 5041, 5042]
+Retaining 65 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">obs_df</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">keys</span><span class="o">=</span><span class="n">degs</span><span class="p">[</span><span class="s2">"names"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"leiden"</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"expressions_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pq"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_degs</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">degs</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="s2">"group"</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"names"</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">n_degs</span><span class="p">))</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span>
+    <span class="s2">"names"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">"names"</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+    <span class="n">leiden_colors</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"group"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">"leiden_colors"</span><span class="p">])}</span>
+    <span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">write_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"top_degs_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pq"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_3710277/3434829897.py:3: DeprecationWarning: In Polars 2.0, the default behavior for `empty_as_null` will change to `False`. To keep the current behavior, explicitly set `empty_as_null=True`.
+  degs.group_by(&#34;group&#34;, maintain_order=True).agg(pl.col(&#34;names&#34;).head(n_degs)).explode(
+</pre></div></div>
+</div>
+</section>
+<section id="6-2.-Automated-Annotation-with-CellTypist">
+<h3>6-2. Automated Annotation with CellTypist<a class="headerlink" href="#6-2.-Automated-Annotation-with-CellTypist" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">celltypist</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">models_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">CellTypist_Models</span><span class="p">)</span>
+
+<span class="n">MODEL_NAME</span> <span class="o">=</span> <span class="s2">"Immune_All_Low.pkl"</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="n">CellTypist_Models</span> <span class="o">/</span> <span class="n">MODEL_NAME</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">model_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">celltypist</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">download_models</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">model_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">hashlib</span><span class="o">.</span><span class="n">file_digest</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"sha256"</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+290874d35dac039d4c9218c343fde4aac1077709b72a331ce7266f6828c36502
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_ct</span> <span class="o">=</span> <span class="n">celltypist</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">MODEL_NAME</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">tl</span><span class="o">.</span><span class="n">leiden</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">flavor</span><span class="o">=</span><span class="s2">"igraph"</span><span class="p">,</span>
+    <span class="n">n_iterations</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">key_added</span><span class="o">=</span><span class="s2">"celltypist_over_clustering"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">annotated</span> <span class="o">=</span> <span class="n">celltypist</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model_ct</span><span class="p">,</span>
+    <span class="n">majority_voting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">over_clustering</span><span class="o">=</span><span class="s2">"celltypist_over_clustering"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_adata</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"celltypist_"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+🔬 Input data has 2070 cells and 13123 genes
+🔗 Matching reference genes in the model
+🧬 4007 features used for prediction
+⚖️ Scaling input data
+🖋️ Predicting labels
+✅ Prediction done!
+🗳️ Majority voting the predictions
+✅ Majority voting done!
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">candidate_size</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"celltypist_majority_voting"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">size</span>
+<span class="n">candidate_colors</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">v</span><span class="p">:</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">palettes</span><span class="o">.</span><span class="n">godsnot_102</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"celltypist_majority_voting"</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">hue</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="p">[</span><span class="s2">"leiden"</span><span class="p">,</span> <span class="s2">"celltypist_majority_voting"</span><span class="p">]):</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
+        <span class="n">annotated</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">hue</span><span class="p">,</span>
+        <span class="n">palette</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">"leiden_colors"</span><span class="p">]</span> <span class="k">if</span> <span class="n">hue</span> <span class="o">==</span> <span class="s2">"leiden"</span> <span class="k">else</span> <span class="n">candidate_colors</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+
+    <span class="n">a</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">hue</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"center left"</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_46_0.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_46_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"celltypist_majority_voting"</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">palette</span><span class="o">=</span><span class="n">candidate_colors</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"OnlyPoetry (</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"center left"</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"CellTypist"</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"umap_celltypist_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pdf"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg_savefig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 45 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92]
+Closed glyph list over &#39;MATH&#39;: 51 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;GSUB&#39;: 51 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;GSUB&#39;: 51 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;glyf&#39;: 51 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;glyf&#39;: 51 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 18, 19, 20, 23, 25, 36, 37, 38, 39, 40, 44, 46, 48, 49, 50, 51, 53, 55, 68, 70, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Retaining 51 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;MATH&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closing glyph list over &#39;GSUB&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;GSUB&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closing glyph list over &#39;glyf&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;glyf&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Retaining 5 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [62]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_47_1.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_47_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">df_ct</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span>
+    <span class="n">annotated</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"leiden"</span><span class="p">],</span> <span class="n">annotated</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"celltypist_majority_voting"</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">(</span><span class="n">df_ct</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">df_ct</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"viridis"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"OnlyPoetry (</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">"Leiden"</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"celltypist_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pdf"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg_savefig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 54 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92]
+Closed glyph list over &#39;MATH&#39;: 60 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;GSUB&#39;: 60 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;GSUB&#39;: 60 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;glyf&#39;: 60 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;glyf&#39;: 60 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;A&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;E&#39;, &#39;I&#39;, &#39;K&#39;, &#39;L&#39;, &#39;M&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;R&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;eight&#39;, &#39;five&#39;, &#39;four&#39;, &#39;g&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nine&#39;, &#39;nonmarkingreturn&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;period&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;seven&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;three&#39;, &#39;two&#39;, &#39;u&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;x&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 36, 37, 38, 39, 40, 44, 46, 47, 48, 49, 50, 51, 53, 55, 68, 70, 71, 72, 74, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 88, 89, 90, 91, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Retaining 60 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;MATH&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closing glyph list over &#39;GSUB&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;GSUB&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closing glyph list over &#39;glyf&#39;: 5 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Closed glyph list over &#39;glyf&#39;: 5 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;nonmarkingreturn&#39;, &#39;space&#39;, &#39;uniFB00&#39;]
+Glyph IDs:   [0, 1, 2, 3, 5038]
+Retaining 5 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [62]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_48_1.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_48_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_obs</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">annotated</span><span class="o">.</span><span class="n">obs</span><span class="p">[[</span><span class="s2">"leiden"</span><span class="p">,</span> <span class="s2">"celltypist_majority_voting"</span><span class="p">]])</span>
+
+<span class="n">mapping_df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">df_obs</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="s2">"leiden"</span><span class="p">,</span> <span class="n">maintain_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"celltypist_majority_voting"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">()</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"ct"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"leiden"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+        <span class="n">annotation</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">len</span><span class="p">()</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="s2">"ct"</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span>
+            <span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"ct"</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">" #"</span>
+            <span class="o">+</span> <span class="n">pl</span><span class="o">.</span><span class="n">int_range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pl</span><span class="o">.</span><span class="n">len</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="s2">"ct"</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">String</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"ct"</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"leiden"</span><span class="p">,</span> <span class="s2">"annotation"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">mapping_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (7, 2)</small><table border="1" class="dataframe"><thead><tr><th>leiden</th><th>annotation</th></tr><tr><td>str</td><td>str</td></tr></thead><tbody><tr><td>&quot;0&quot;</td><td>&quot;Tcm/Naive helper T cells #1&quot;</td></tr><tr><td>&quot;1&quot;</td><td>&quot;Tcm/Naive helper T cells #2&quot;</td></tr><tr><td>&quot;2&quot;</td><td>&quot;B cells&quot;</td></tr><tr><td>&quot;3&quot;</td><td>&quot;NK cells&quot;</td></tr><tr><td>&quot;4&quot;</td><td>&quot;Classical monocytes&quot;</td></tr><tr><td>&quot;5&quot;</td><td>&quot;Non-classical monocytes&quot;</td></tr><tr><td>&quot;6&quot;</td><td>&quot;CD16+ NK cells&quot;</td></tr></tbody></table></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"annotation"</span><span class="p">]</span> <span class="o">=</span> <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">"leiden"</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+    <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mapping_df</span><span class="p">[</span><span class="s2">"leiden"</span><span class="p">],</span> <span class="n">mapping_df</span><span class="p">[</span><span class="s2">"annotation"</span><span class="p">]))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">umap</span><span class="p">(</span>
+    <span class="n">adata</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"annotation"</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">palette</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">"leiden_colors"</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"OnlyPoetry (</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="n">a</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"center left"</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Annotation"</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">OUTPUT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"umap_with_annotation_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pdf"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg_savefig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+maxp pruned
+cmap pruned
+kern dropped
+post pruned
+FFTM dropped
+GPOS pruned
+GSUB pruned
+glyf pruned
+Added gid0 to subset
+Added first four glyphs to subset
+Closing glyph list over &#39;MATH&#39;: 39 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92]
+Closed glyph list over &#39;MATH&#39;: 45 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;GSUB&#39;: 45 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;GSUB&#39;: 45 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closing glyph list over &#39;glyf&#39;: 45 glyphs before
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Closed glyph list over &#39;glyf&#39;: 45 glyphs after
+Glyph names: [&#39;.notdef&#39;, &#39;.null&#39;, &#39;B&#39;, &#39;C&#39;, &#39;D&#39;, &#39;K&#39;, &#39;N&#39;, &#39;O&#39;, &#39;P&#39;, &#39;T&#39;, &#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;four&#39;, &#39;h&#39;, &#39;hyphen&#39;, &#39;i&#39;, &#39;l&#39;, &#39;m&#39;, &#39;n&#39;, &#39;nonmarkingreturn&#39;, &#39;numbersign&#39;, &#39;o&#39;, &#39;one&#39;, &#39;p&#39;, &#39;parenleft&#39;, &#39;parenright&#39;, &#39;plus&#39;, &#39;r&#39;, &#39;s&#39;, &#39;six&#39;, &#39;slash&#39;, &#39;space&#39;, &#39;t&#39;, &#39;two&#39;, &#39;uni239B&#39;, &#39;uni239C&#39;, &#39;uni239D&#39;, &#39;uni239E&#39;, &#39;uni239F&#39;, &#39;uni23A0&#39;, &#39;v&#39;, &#39;w&#39;, &#39;y&#39;, &#39;zero&#39;]
+Glyph IDs:   [0, 1, 2, 3, 6, 11, 12, 14, 16, 18, 19, 20, 21, 23, 25, 37, 38, 39, 46, 49, 50, 51, 55, 68, 70, 72, 75, 76, 79, 80, 81, 82, 83, 85, 86, 87, 89, 90, 92, 3506, 3507, 3508, 3509, 3510, 3511]
+Retaining 45 glyphs
+head subsetting not needed
+hhea subsetting not needed
+maxp subsetting not needed
+OS/2 subsetting not needed
+hmtx subsetted
+cmap subsetted
+fpgm subsetting not needed
+prep subsetting not needed
+cvt  subsetting not needed
+loca subsetting not needed
+post subsetted
+gasp subsetting not needed
+MATH subsetted
+GDEF subsetted
+GPOS subsetted
+GSUB subsetted
+name subsetting not needed
+glyf subsetted
+head pruned
+OS/2 Unicode ranges pruned: [0]
+OS/2 CodePage ranges pruned: [0]
+glyf pruned
+GDEF pruned
+GPOS pruned
+GSUB pruned
+name pruned
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/jupyternb_01_preprocessing_with_python_hww04_51_1.png" src="../_images/jupyternb_01_preprocessing_with_python_hww04_51_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pl</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span>
+    <span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[[</span><span class="s2">"leiden"</span><span class="p">,</span> <span class="s2">"celltypist_majority_voting"</span><span class="p">,</span> <span class="s2">"annotation"</span><span class="p">]]</span>
+    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="p">)</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+    <span class="n">leiden_colors</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"leiden"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">uns</span><span class="p">[</span><span class="s2">"leiden_colors"</span><span class="p">])}</span>
+    <span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">with_columns</span><span class="p">(</span>
+    <span class="n">celltypist_colors</span><span class="o">=</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"celltypist_majority_voting"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">candidate_colors</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">write_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"annotations_</span><span class="si">{</span><span class="n">ENV_SUFFIX</span><span class="si">}</span><span class="s2">.pq"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="7.-Execution-Environment-Details">
+<h2>7. Execution Environment Details<a class="headerlink" href="#7.-Execution-Environment-Details" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-bash notranslate"><div class="highlight"><pre><span></span>%%bash
+bash<span class="w"> </span>.rep_exe_env.sh
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+============================================================
+Execution Environment
+============================================================
+Timestamp (UTC):         2026-09-29T21:34:54Z
+Hostname:                hww04
+FQDN:                    hww04i
+OS:                      Red Hat Enterprise Linux 8.8 (Ootpa)
+Kernel:                  5.14.0-570.55.1.el9_6.x86_64
+Architecture:            x86_64
+CPU model:               INTEL(R) XEON(R) GOLD 6542Y
+CPU sockets:             2
+Cores / socket:          24
+Threads / core:          1
+Logical CPUs:            48
+System memory:           1006.9 GiB
+System vendor:           XFUSION
+System model:            2288H V7
+GPU(s):                  None / nvidia-smi unavailable
+============================================================
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="01_preprocessing_with_python_acrest-gpu1.html" class="btn btn-neutral float-left" title="01: Preprocessing the PBMC 3k dataset with Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="03_gse223065_acrest-gpu1.html" class="btn btn-neutral float-right" title="03: Python-based Preprocessing Routine Reproducibility" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
