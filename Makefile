@@ -1,14 +1,18 @@
 BASALCELL_DEMO_REF ?= main
 RAW_BASE := https://raw.githubusercontent.com/yo-aka-gene/BasalCellDemo/$(BASALCELL_DEMO_REF)
 
-.PHONY: init sync-spec
+KERNEL_NAME := onlypoetry_py
+
+.PHONY: init sync-spec docs
 
 sync-spec:
 	curl -fsSL $(RAW_BASE)/pyproject.toml -o pyproject.toml
 	curl -fsSL $(RAW_BASE)/poetry.lock -o poetry.lock
+	sed -i '0,/^name = "basalcelldemo"$$/s//name = "onlypoetry"/' pyproject.toml
 
 init: sync-spec
 	poetry install
+	poetry run python -m ipykernel install --user --name $(KERNEL_NAME) --display-name "OnlyPoetry (Python)"
 
 docs:
 	@echo "Building Sphinx HTML documentation..."
